@@ -8,6 +8,10 @@
 uint16_t val;
 double dat;
 
+int bouton1 = 4;
+int bouton2 = 5;
+int Allume = 255;
+
 #define PIN_LED 2     // Control signal, connect to DI of the LED
 #define NUM_LED 1     // Number of LEDs in a strip
 
@@ -52,7 +56,19 @@ void loop()
     Serial.print(dat);
     Serial.println("C");
     delay(5000);
+    if (Droit == LOW && Gauche == LOW)
+    {
+        analogWrite(bouton1, 0);
+        analogWrite(bouton2, 0);
+    }
+
+    else if (Droit == true && Gauche == false)
+    {
+        analogWrite(bouton2, 0);
+        analogWrite(bouton1, Allume);
+    }
     appendPayload("Tep", val);
+    appendPayload("bouton1", Droit);
     sendPayload();
 
 }
