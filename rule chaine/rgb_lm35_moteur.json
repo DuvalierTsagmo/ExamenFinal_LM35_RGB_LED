@@ -1,0 +1,150 @@
+{
+  "ruleChain": {
+    "additionalInfo": {
+      "description": ""
+    },
+    "name": "RGB_LM35_Moteur",
+    "type": "CORE",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null
+  },
+  "metadata": {
+    "firstNodeIndex": 5,
+    "nodes": [
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1020,
+          "layoutY": 160
+        },
+        "type": "org.thingsboard.rule.engine.mail.TbMsgToEmailNode",
+        "name": "Generateur de Temperature",
+        "debugMode": true,
+        "configuration": {
+          "fromTemplate": "tsagmoduvalier@gmail.com",
+          "toTemplate": "edtsagmo01@monccnb.ca",
+          "ccTemplate": null,
+          "bccTemplate": null,
+          "subjectTemplate": "Notification du moteur ${position}",
+          "mailBodyType": null,
+          "isHtmlTemplate": null,
+          "bodyTemplate": " le  ${bouton} est en arret "
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 1204,
+          "layoutY": 297
+        },
+        "type": "org.thingsboard.rule.engine.mail.TbSendEmailNode",
+        "name": "Send email",
+        "debugMode": true,
+        "configuration": {
+          "useSystemSmtpSettings": true,
+          "smtpHost": "localhost",
+          "smtpPort": 25,
+          "username": null,
+          "password": null,
+          "smtpProtocol": "smtp",
+          "timeout": 10000,
+          "enableTls": false,
+          "tlsVersion": "TLSv1.2",
+          "enableProxy": false,
+          "proxyHost": null,
+          "proxyPort": null,
+          "proxyUser": null,
+          "proxyPassword": null
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 557,
+          "layoutY": 86
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Transfert de données au metadata",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "\nmetadata.bouton = \"bouton1\";\nreturn {msg: msg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 558,
+          "layoutY": 249
+        },
+        "type": "org.thingsboard.rule.engine.action.TbClearAlarmNode",
+        "name": "Arret Mode Alarme",
+        "debugMode": true,
+        "configuration": {
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;",
+          "alarmType": "Haute Temperature"
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 832,
+          "layoutY": 49
+        },
+        "type": "org.thingsboard.rule.engine.action.TbCreateAlarmNode",
+        "name": "Instantiation Mode Alarme",
+        "debugMode": true,
+        "configuration": {
+          "alarmDetailsBuildJs": "var details = {};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;",
+          "useMessageAlarmData": false,
+          "alarmType": "Haute Temperature",
+          "severity": "CRITICAL",
+          "propagate": false,
+          "relationTypes": []
+        }
+      },
+      {
+        "additionalInfo": {
+          "description": "",
+          "layoutX": 331,
+          "layoutY": 151
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Génération d'alarme",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "return msg.bouton1 == 0;"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 1,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 4,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 4,
+        "toIndex": 0,
+        "type": "Created"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 2,
+        "type": "True"
+      },
+      {
+        "fromIndex": 5,
+        "toIndex": 3,
+        "type": "False"
+      }
+    ],
+    "ruleChainConnections": null
+  }
+}
