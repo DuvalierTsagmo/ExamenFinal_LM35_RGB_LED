@@ -5,14 +5,13 @@
 #include "MQTTConnector.h"
 #include <Adafruit_NeoPixel.h>
 
-int ledPin1 = 2;
-int ledPin2 = 3;
-int ledPin3 = 4;  // choose the pin for the LED
-int inputPin = 2; // Connect sensor to input pin 3
-int val1 = digitalRead(inputPin);
-int val2 = digitalRead(inputPin);
-int val3 = digitalRead(inputPin);
-// broche pour la RGB
+uint16_t val;
+double dat;
+
+int bouton1 = 4;
+int bouton2 = 5;
+int Allume = 255;
+
 #define PIN_LED 2 // Control signal, connect to DI of the LED
 #define NUM_LED 1 // Number of LEDs in a strip
 
@@ -43,10 +42,6 @@ void setup()
     Serial.begin(9600);
     wifiConnect(); // Branchement au réseau WIFI
     MQTTConnect(); // Branchement au broker MQTT
-    pinMode(ledPin1, OUTPUT);
-    pinMode(ledPin2, OUTPUT);
-    pinMode(ledPin3, OUTPUT); // declare LED as output
-    pinMode(inputPin, INPUT); // declare pushbutton as input
     RGB_Strip.begin();
     RGB_Strip.show();
     RGB_Strip.setBrightness(128);
@@ -55,51 +50,25 @@ void setup()
 void loop()
 {
 
-    // read input value
-    if (val1 == HIGH)
-    { // check if the input is HIGH
-        digitalWrite(ledPin1, LOW);
-        // turn LED OFF
-    }
-    else
+    val = analogRead(A2); // Connect LM35 on Analog 0
+    dat = (double)val * (5 / 10.24);
+    Serial.print("Tep:"); // Display the temperature on Serial monitor
+    Serial.print(dat);
+    Serial.println("C");
+    delay(5000);
+    if (Droit == LOW && Gauche == LOW)
     {
-        digitalWrite(ledPin1, HIGH); // turn LED ON
+        analogWrite(bouton1, 0);
+        analogWrite(bouton2, 0);
     }
-    delay(1000);
-    // read input value
-    if (val2 == HIGH)
-    {                               // check if the input is HIGH
-        digitalWrite(ledPin2, LOW); // turn LED OFF
-    }
-    else
+
+    else if (Droit == true && Gauche == false)
     {
-        digitalWrite(ledPin2, HIGH); // turn LED ON
+        analogWrite(bouton2, 0);
+        analogWrite(bouton1, Allume);
     }
-    delay(1000);
-    // read input value
-    if (val3 == HIGH)
-    {                               // check if the input is HIGH
-        digitalWrite(ledPin3, LOW); // turn LED OFF
-    }
-    else
-    {
-        digitalWrite(ledPin3, HIGH); // turn LED ON
-    }
-    /*
-    colorWipe(RGB_Strip.Color(255, 0, 0), 1000); // Red
-    colorWipe(RGB_Strip.Color(0, 255, 0), 1000); // Green
-    colorWipe(RGB_Strip.Color(0, 0, 255), 1000); // Blue
 
-    colorWipe(RGB_Strip.Color(RED_VAL_1, GREEN_VAL_1, BLUE_VAL_1), 1000); // Custom colour1: Yellow
-    colorWipe(RGB_Strip.Color(RED_VAL_2, GREEN_VAL_2, BLUE_VAL_2), 1000); // Custom colour2: Purple
-    colorWipe(RGB_Strip.Color(RED_VAL_3, GREEN_VAL_3, BLUE_VAL_3), 1000); // Custom colour3: Cyan
-    colorWipe(RGB_Strip.Color(RED_VAL_4, GREEN_VAL_4, BLUE_VAL_4), 1000); // Custom colour4: White
-
-    rainbow(20); // Rainbow
-    */
-
-    appendPayload("bouton1", val1);
-    appendPayload("bouton2", val2);
-    appendPayload("bouton3", val3);
+    appendPayload("Tep", val);
+    appendPayload("bouton1", Droit);
     sendPayload();
 }
